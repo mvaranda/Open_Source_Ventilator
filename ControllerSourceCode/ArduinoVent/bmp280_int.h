@@ -26,7 +26,7 @@
  * @author Marcelo Varanda
  * @date April 2020
  *
- * @brief File containing pressure reading from Bosh BMP280 sensor.
+ * @brief File containing pressure reading from the Bosh BMP280 sensor.
  *
  * It uses a modified code from the original sSense-BMx280I2C library now present in this code as cpp files: 
  * sSense-BMx280I2C_mv and BME280_mv
