@@ -90,7 +90,7 @@ static  alarm_vars_t alarm_vars [] = {
 };
 
 
-#if 0 //ndef VENTSIM
+#ifndef VENTSIM
   static const alarm_t alarms[] PROGMEM = {
 #else
   static const alarm_t alarms[] = {
