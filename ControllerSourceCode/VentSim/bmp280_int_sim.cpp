@@ -22,6 +22,8 @@
 #include "config.h"
 #include <stdint.h>
 
+extern unsigned int gAnalogPressure;
+
 //--------- special return values for bpm280GetPressure and getCmH2OGauge
 #define BMP_ST__INITIALIZING   -100.0f  // initializing
 #define BMP_ST__NOT_FOUND      -200.0f  // could not get initialized
@@ -44,7 +46,7 @@ void  bmp280SetReference()
 }
 float getCmH2OGauge()
 {
-    return 10.0;
+    return gAnalogPressure * 1.0;
 }
 
 

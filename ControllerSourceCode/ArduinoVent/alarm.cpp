@@ -40,10 +40,13 @@ typedef enum : uint8_t {
 typedef void (*muteFunc_t)(void);
 typedef void (*goOffFunc_t)(void);
 
+typedef struct alarm_vars_st {
+state_t     state;
+uint8_t     cnt_sound;         // num of times being sounded before become visual only
+} alarm_vars_t;
 
 typedef struct alarm_st {
-    state_t     state;
-    uint8_t     cnt_sound;         // num of times being sounded before become visual only
+    alarm_vars_t * vars;
     int8_t      max_sound;         // num max to be sounded. if -1 always will have sound alarm
     const char *  message;
     goOffFunc_t goOffAction;
@@ -52,10 +55,10 @@ typedef struct alarm_st {
 
 static Alarm * alarm;
 
-inline bool isMuted (alarm_t * a) {
+inline bool isMuted (const alarm_t * a) {
     if (a->max_sound == -1)
         return false;
-    if (a->cnt_sound >= a->max_sound)
+    if (a->vars->cnt_sound >= a->max_sound)
         return true;
     return false;
 }
@@ -75,10 +78,25 @@ void muteLowPressureAlarm()
 
 }
 
-static alarm_t alarms[] = {
+// It looks complicated... but we want alarms to be in PROGMEM.
+static  alarm_vars_t alarm_vars [] = {
+                        // For:
+    {ST_ALARM_OFF, 0},  //   HIGH_PRESSURE
+    {ST_ALARM_OFF, 0},  //   LOW_PRESSURE
+    {ST_ALARM_OFF, 0},  //   UNDER_SPEEP
+    {ST_ALARM_OFF, 0},  //   FAST_CALIB_TO_START
+    {ST_ALARM_OFF, 0},  //   FAST_CALIB_DONE
+    {ST_ALARM_OFF, 0},  //   BAD_PRESS
+};
+
+
+#if 0 //ndef VENTSIM
+  static const alarm_t alarms[] PROGMEM = {
+#else
+  static const alarm_t alarms[] = {
+#endif
   {
-        ST_ALARM_OFF,
-        0,
+        &alarm_vars[0],
         MAX_SOUND_ALARM_HIGH_PRESSURE,
         STR_ALARM_HIGH_PRESSURE,
         0,
@@ -86,8 +104,7 @@ static alarm_t alarms[] = {
   },
 
   {
-        ST_ALARM_OFF,
-        0,
+        &alarm_vars[1],
         MAX_SOUND_ALARM_LOW_PRESSURE,
         STR_ALARM_LOW_PRESSURE,
         0,
@@ -95,8 +112,7 @@ static alarm_t alarms[] = {
   },
   
   {
-        ST_ALARM_OFF,
-        0,
+        &alarm_vars[2],
         MAX_SOUND_ALARM_UNDER_SPEED,
         STR_ALARM_UNDER_SPEED,
         0,
@@ -104,35 +120,54 @@ static alarm_t alarms[] = {
   },
 
     {
-          ST_ALARM_OFF,
-          0,
-          MAX_SOUND_DEFAULT,
-          STR_ALARM_FAST_CALIB_TO_START,
-          0,
-          0
+        &alarm_vars[3],
+        MAX_SOUND_DEFAULT,
+        STR_ALARM_FAST_CALIB_TO_START,
+        0,
+        0
     },
 
     {
-          ST_ALARM_OFF,
-          0,
-          MAX_SOUND_DEFAULT,
-          STR_ALARM_FAST_CALIB_DONE,
-          0,
-          0
+        &alarm_vars[4],
+        MAX_SOUND_DEFAULT,
+        STR_ALARM_FAST_CALIB_DONE,
+        0,
+        0
     },
   
     {
-          ST_ALARM_OFF,
-          0,
-          MAX_SOUND_DEFAULT,
-          STR_ALARM_BAD_PRESS_SENSOR,
-          0,
-          0
+        &alarm_vars[5],
+        MAX_SOUND_DEFAULT,
+        STR_ALARM_BAD_PRESS_SENSOR,
+        0,
+        0
     },
 
 
 };
 #define NUM_ALARMS  sizeof(alarms) / sizeof(alarm_t)
+
+#ifndef VENTSIM
+alarm_t * loadAlarmRecord(int idx) {
+    static alarm_t alarm;
+    int i;
+    uint8_t * srcPtr = (uint8_t *) &alarms[idx];
+    uint8_t * dstPtr = (uint8_t *) &alarm;
+
+    for (i=0; i<sizeof(alarm_t); i++) {
+        *dstPtr = pgm_read_byte_near(srcPtr);
+        srcPtr++;
+        dstPtr++;
+    }
+    return &alarm;
+}
+#else
+alarm_t * loadAlarmRecord(int idx) {
+    static alarm_t alarm;
+    alarm = alarms[idx];
+    return &alarm;
+}
+#endif
 
 void Alarm::beepOnOff(bool on)
 {
@@ -153,11 +188,12 @@ void Alarm::beepOnOff(bool on)
 void Alarm::internalAlarmResetAll()
 {
     uint8_t i;
-    alarm_t * a = alarms;
+    const alarm_t * a;
     activeAlarmIdx = -1;
     for (i=0; i< NUM_ALARMS; i++) {
-        a->cnt_sound = 0;
-        a->state = ST_ALARM_OFF;
+        a = loadAlarmRecord(i);
+        a->vars->cnt_sound = 0;
+        a->vars->state = ST_ALARM_OFF;
         a++;
     }
     beepOnOff(false);
@@ -167,7 +203,7 @@ void Alarm::internalAlarmResetAll()
 void Alarm::setNextAlarmIfAny(bool fromMute)
 {
     uint8_t i;
-    alarm_t * a;
+    const alarm_t * a;
 
     if (activeAlarmIdx >= 0) {
         // tolerates as there is already an alarm. mute will take care of calling this func once again
@@ -175,9 +211,9 @@ void Alarm::setNextAlarmIfAny(bool fromMute)
     }
 
     for (i=0; i< NUM_ALARMS; i++) {
-        a = &alarms[i];
+        a = loadAlarmRecord(i);
 
-        if (a->state == ST_ALARM_ON){
+        if (a->vars->state == ST_ALARM_ON){
             activeAlarmIdx = i;
             if (a->goOffAction) { // call an action if a callback was defined
                 a->goOffAction();
@@ -199,14 +235,14 @@ void Alarm::muteAlarmIfOn()
 
     beepOnOff(false);
 
-    alarm_t * a = &alarms[activeAlarmIdx];
+    const alarm_t * a = loadAlarmRecord(activeAlarmIdx);
 
     if (a->muteAction) { // call an action if a callback was defined
         a->muteAction();
     }
-    a->state = ST_ALARM_OFF;
-    if ((a->max_sound != -1) && (a->cnt_sound < a->max_sound))
-        a->cnt_sound++;
+    a->vars->state = ST_ALARM_OFF;
+    if ((a->max_sound != -1) && (a->vars->cnt_sound < a->max_sound))
+        a->vars->cnt_sound++;
 
     activeAlarmIdx = -1;
     CEvent::post(EVT_ALARM_DISPLAY_OFF, 0);
@@ -224,9 +260,9 @@ void alarmLoop()
 
 }
 
-static void processAlarmEvent(alarm_t * a)
+static void processAlarmEvent(const alarm_t * a)
 {
-  a->state = ST_ALARM_ON;
+  a->vars->state = ST_ALARM_ON;
   if (isMuted(a) == false) {
       alarm->beepOnOff(true);
   }
@@ -246,7 +282,7 @@ void Alarm::Loop()
 
 propagate_t Alarm::onEvent(event_t * event)
 {
-    alarm_t * a;
+    const alarm_t * a;
     int i;
 
     switch (event->type) {
@@ -257,7 +293,7 @@ propagate_t Alarm::onEvent(event_t * event)
             LOG("Alarm with bad parameter");
             return PROPAGATE;
         }
-        a = &alarms[event->param.iParam];
+        a = loadAlarmRecord( event->param.iParam);
         processAlarmEvent(a);
         break;
 

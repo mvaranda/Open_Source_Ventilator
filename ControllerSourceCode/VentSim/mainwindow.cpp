@@ -29,7 +29,7 @@
 #include "hal.h"
 #include "event.h"
 
-unsigned int gAnalogPressure = 300;
+unsigned int gAnalogPressure = 5;
 unsigned int gAnalogFlow = 300;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->bt_left, SIGNAL (pressed()),this, SLOT (onBtLeftPressed()));
     connect(ui->bt_left, SIGNAL (released()),this, SLOT (onBtLeftRelease()));
 
-    ui->PressureSlider->setMaximum(613);
+    ui->PressureSlider->setMaximum(40);
     ui->PressureSlider->setValue(gAnalogPressure);
     ui->lb_pressure->setNum((int) gAnalogPressure);
     connect(ui->PressureSlider, SIGNAL (valueChanged(int)),this, SLOT (onPressureSliderChange(int)));
