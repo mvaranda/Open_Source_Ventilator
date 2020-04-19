@@ -1,9 +1,6 @@
-# Open_Source_Ventilator
-Open source for use worldwide and contributions from others worldwide
+# Focus on ControllerSourceCode folder
 
-Created a Realization branch for physical layout and components RL Benedict 3/25/2020
+The focus of this Fork is the developement and maintainance of the ControllerSourceCode folder. It holts a flexible code for supporting different hardware variants as well as provides a modular architecture for adding new features. 
 
-# Controller
-
-The [here](ControllerSourceCode/README.md) for info about the Controller.
+Prime contact: [mv_email@yahoo.com](mailto:mv_email@yahoo.com)
 
