@@ -35,7 +35,7 @@ Where the rows represent the following tokes:
  To change a parameter the user needs to press and hold the **"Set"** button for half+ second; it enters in "Enter" mode; then the selected row starts flashing indicating that the parameter can be changed; the The **"-"** and **"+"** buttons increment or decrement the value; Pressing the **"Set"** button commits the change (and so if times-out) and return the unit to "Normal" mode. 
 
 ### To Do List
-Click [here](TODO.md) to access the TODO list
+Click [here](ControllerSourceCode/TODO.md) to access the TODO list
 
 Prime contact: [mv_email@yahoo.com](mailto:mv_email@yahoo.com)
 
