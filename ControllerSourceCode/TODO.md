@@ -10,7 +10,7 @@ Following are things in my TODO list (other than adding features):
 
 *  :white_check_mark:[DONE] Prevent the “params" array structure to use RAM. There is a huge limitation in this processor where even when you define a “const whatever” it allocates program space as well as a  DUPLICATION of it in RAM. I can give you more background about it  in case you decide to start wit that.
 
-* same idea than above for alarms's array in alarm.cpp: use PROMEM to save RAM.
+* :white_check_mark:[DONE] same idea than above for alarms's array in alarm.cpp: use PROMEM to save RAM.
 
 * Hack the Bootloader to pass the content of the watchdog register information. Actually the boot loader makes this register available in the processor R2. But the boot loader resets the flag that we are interesting in before calling out App. Again, I can give you more details and there are already boot loaders with this hack.
 
