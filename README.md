@@ -15,7 +15,7 @@
 [Click here to see the schematic](Docs/schematic.pdf)
 
 ### Demos and Tutorials Videos
-[click here for playlist with demo videos and tutorials](https://www.youtube.com/watch?v=gKr-EH8vHxM&list=PLtBsFN3o4c54h5fr7lDnGuZhvKIA5Fhd3)
+[click here for playlist with demo videos and tutorials](https://rumble.com/vdsadx-open-ventilator.html)
 
 ## Controller
 Main function: Provides control for inhalation/exhalation valves and/or stepper motor; monitors pressure and tidal volume. alarms in case of unexpected parameters (unexpected pressure, A/C power down, reset and etc). UI operated by LCD (20x4 20X2 or 16x2) and 3 buttons. Main settings: BPM, duty-cycle, pressure and tidal volume threshoulds.
